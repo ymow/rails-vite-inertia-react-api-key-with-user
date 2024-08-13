@@ -2,6 +2,7 @@
 
 module Users
   class UsersController < ApplicationController
+    before_action :set_user, only: %i[edit update]
     # TODO: implement authorization
 
     def index
@@ -25,15 +26,28 @@ module Users
     end
 
     def edit
-      user = User.find(params[:id])
+      @user.build_agent unless @user.agent
       render inertia: 'Admin/Users/Edit', props: {
-        user:,
+        user: @user.as_json(include: :agent),
         usersListPath: admin_users_path,
-        userPutPath: admin_user_path(user),
-        userDeletePath: admin_user_path(user)
+        userPutPath: admin_user_path(@user),
+        userDeletePath: admin_user_path(@user)
       }
-    rescue ActiveRecord::RecordNotFound => _e
-      redirect_to(admin_users_path, alert: t('users.edit.not_found'))
+    end
+
+    def update
+      @user.build_agent unless @user.agent
+
+      if @user.update(user_params)
+        @user.agent.api_key = params['agent']['api_key']
+        @user.save!
+        redirect_to edit_admin_user_path(@user), notice: t('users.update.success')
+      else
+        render inertia: 'Admin/Users/Edit', props: {
+          user: @user.as_json(include: :agent),
+          errors: @user.errors.full_messages
+        }, status: :unprocessable_entity
+      end
     end
 
     def create
@@ -42,15 +56,6 @@ module Users
         redirect_to(admin_users_path, notice: t('users.create.success'))
       else
         redirect_to(new_admin_user_path, alert: t('users.create.error'), inertia: { errors: user.errors })
-      end
-    end
-
-    def update
-      user = User.find(params[:id])
-      if user.update(user_params)
-        redirect_to(edit_admin_user_path(user), notice: t('users.update.success'))
-      else
-        redirect_to(edit_admin_user_path(user), alert: t('users.update.error'), inertia: { errors: user.errors })
       end
     end
 
@@ -64,10 +69,12 @@ module Users
 
     private
 
+    def set_user
+      @user = User.find(params[:id])
+    end
+
     def user_params
-      params
-        .require(:user)
-        .permit(:username, :email, :password, :password_confirmation)
+      params.require(:user).permit(:username, :email, :password, :password_confirmation, agent_attributes: [:id, :api_key])
     end
   end
 end

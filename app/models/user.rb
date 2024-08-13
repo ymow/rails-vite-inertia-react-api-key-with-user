@@ -7,8 +7,9 @@ class User < ApplicationRecord
   validates :username, presence: true, uniqueness: { case_sensitive: false }
   validates :username, format: { with: /^[a-zA-Z0-9_.]*$/, multiline: true }
 
-  attr_writer :login
+  has_one :agent, dependent: :destroy
 
+  attr_writer :login
   def login
     @login || username || email
   end

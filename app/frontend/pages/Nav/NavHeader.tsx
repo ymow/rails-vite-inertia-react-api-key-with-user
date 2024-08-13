@@ -1,6 +1,6 @@
 import { useDisclosure } from '@chakra-ui/react';
 import { router } from '@inertiajs/react';
-import { FaUsers } from 'react-icons/fa';
+import { FaUsers,FaKey } from 'react-icons/fa';
 
 import ConfirmationDialog from '@/components/ConfirmationDialog';
 import { MenuOptionType } from './MenuDefinitionType';
@@ -34,10 +34,6 @@ const NavHeader = () => {
           label: 'Users',
           Icon: FaUsers,
         },
-        {
-          path: '/test',
-          label: 'Test',
-        },
       ],
     },
     {
@@ -47,6 +43,7 @@ const NavHeader = () => {
       onClick: () => setOpenLogoutConfirmation(),
     },
   ];
+
 
   return (
     <>

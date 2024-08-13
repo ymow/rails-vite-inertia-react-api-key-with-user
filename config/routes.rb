@@ -17,5 +17,6 @@ Rails.application.routes.draw do
 
   namespace :admin, module: 'users' do
     resources :users
+    resources :agents
   end
 end

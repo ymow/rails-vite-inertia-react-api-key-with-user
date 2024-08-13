@@ -36,6 +36,9 @@ type UserType = {
   password_confirmation: string;
   isAdmin: boolean;
   updated_at: string;
+  agent: {
+    api_key: string;
+  };
 };
 
 type UserEditProps = {
@@ -55,6 +58,9 @@ const UserEdit = ({ user, usersListPath, userPutPath, userDeletePath }: UserEdit
     password: user.password,
     password_confirmation: user.password_confirmation,
     isAdmin: user.isAdmin,
+    agent: {
+      api_key: user.agent?.api_key || '',
+    },
   });
   const {
     isOpen: isOpenDeleteConfirmation,
@@ -69,7 +75,12 @@ const UserEdit = ({ user, usersListPath, userPutPath, userDeletePath }: UserEdit
 
   const handleChange = (e: SyntheticEvent<HTMLInputElement>) => {
     const { id: key, value } = e.currentTarget;
-    setData((values) => ({ ...values, [key]: value }));
+    setData((values) => {
+      if (key === 'api_key') {
+        return { ...values, agent: { ...values.agent, api_key: value } };
+      }
+      return { ...values, [key]: value };
+    });
   };
 
   const handleChangeCheckbox = (e: SyntheticEvent<HTMLInputElement>) => {
@@ -174,6 +185,15 @@ const UserEdit = ({ user, usersListPath, userPutPath, userDeletePath }: UserEdit
                   <FormLabel paddingTop="2">Is Admin?</FormLabel>
                 </HStack>
               </FormControl>
+              <TextInput
+                name="api_key"
+                label="ChatGPT API Key"
+                value={data.agent.api_key}
+                onChange={handleChange}
+                variant="filled"
+                errors={errors?.api_key}
+                isRequired
+              />
             </Stack>
             <Stack direction="row" color="gray.400" fontSize="xs">
               <Text>Last modified at:&nbsp;</Text>
